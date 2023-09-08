@@ -3,7 +3,7 @@ from models import Book, Order, Customer
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 
-# Create an SQLite engine and session
+# Create an SQLite engine and session for database interaction
 engine = create_engine('sqlite:///bookstore.db')
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -13,6 +13,7 @@ def main():
     """Bookstore Application CLI"""
     pass
 
+# Define a CLI command to add a new book to the bookstore
 @main.command()
 @click.option('--title', prompt='Enter book title', help='Title of the book')
 @click.option('--author', prompt='Enter author name', help='Author of the book')
@@ -21,6 +22,7 @@ def main():
 @click.option('--stock', prompt='Enter stock quantity', type=int, help='Stock quantity of the book')
 def add_book(title, author, genre, price, stock):
     """Add a new book to the bookstore."""
+     # Sort the books by title for a more organized display
     book = Book(titles=title, author=author, genre=genre, price=price, stock=stock)
     session.add(book)
     session.commit()
@@ -41,6 +43,7 @@ def list_books():
         for book in sorted_books:
             click.echo(f"Title: {book.titles}, Author: {book.author}, Genre: {book.genre}, Price: {book.price}, Stock: {book.stock}")
 
+# Define a CLI command to place an order for a book
 @main.command()
 @click.option('--customer', prompt='Enter customer name', help='Name of the customer')
 @click.option('--book_id', prompt='Enter book ID', type=int, help='ID of the book to order')
@@ -48,11 +51,13 @@ def list_books():
 def place_order(customer, book_id, quantity):
     """Place an order for a book."""
     customer_record = session.query(Customer).filter_by(name=customer).first()
+     # Check if the customer exists, and create a new customer if not
     if not customer_record:
         customer_record = Customer(name=customer)
         session.add(customer_record)
         session.commit()
 
+# Check if the book exists
     book = session.query(Book).filter_by(id=book_id).first()
     if not book:
         click.echo(f"Book with ID {book_id} does not exist.")
