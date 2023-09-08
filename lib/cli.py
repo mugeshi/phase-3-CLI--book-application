@@ -1,5 +1,5 @@
 import click
-from models import Book, Order, Customer  # Import your model classes
+from models import Book, Order, Customer
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 
@@ -11,22 +11,20 @@ session = Session()
 @click.group()
 def main():
     """Bookstore Application CLI"""
-    
     pass
 
 @main.command()
-@click.option('--titles', prompt='Enter book title', help='Title of the book')
+@click.option('--title', prompt='Enter book title', help='Title of the book')
 @click.option('--author', prompt='Enter author name', help='Author of the book')
 @click.option('--genre', prompt='Enter genre', help='Genre of the book')
 @click.option('--price', prompt='Enter price', type=int, help='Price of the book')
 @click.option('--stock', prompt='Enter stock quantity', type=int, help='Stock quantity of the book')
-
-def add_book(titles, author, genre, price, stock):
+def add_book(title, author, genre, price, stock):
     """Add a new book to the bookstore."""
-    book = Book(titles=titles, author=author, genre=genre, price=price, stock=stock)
+    book = Book(titles=title, author=author, genre=genre, price=price, stock=stock)
     session.add(book)
     session.commit()
-    click.echo(f"Book '{titles}' added successfully.")
+    click.echo(f"Book '{title}' added successfully.")
 
 @main.command()
 def list_books():
@@ -36,9 +34,12 @@ def list_books():
     if not books:
         click.echo("No books available.")
     else:
-        click.echo("List of available books:")
-        for book in books:
-            click.echo(f"Title: {book.title}, Author: {book.author}, Genre: {book.genre}, Price: {book.price}, Stock: {book.stock}")
+        # Sort the books by title
+        sorted_books = sorted(books, key=lambda x: x.titles)
+        
+        click.echo("List of available books (sorted by title):")
+        for book in sorted_books:
+            click.echo(f"Title: {book.titles}, Author: {book.author}, Genre: {book.genre}, Price: {book.price}, Stock: {book.stock}")
 
 @main.command()
 @click.option('--customer', prompt='Enter customer name', help='Name of the customer')
@@ -58,14 +59,14 @@ def place_order(customer, book_id, quantity):
         return
 
     if book.stock < quantity:
-        click.echo(f"Sorry, there is not enough stock available for '{book.title}'")
+        click.echo(f"Sorry, there is not enough stock available for '{book.titles}'")
         return
 
     order = Order(customer_id=customer_record.id, book_id=book.id, quantity=quantity)
     session.add(order)
     book.stock -= quantity  # Reduce stock
     session.commit()
-    click.echo(f"Order placed successfully for '{book.title}' by {customer}.")
+    click.echo(f"Order placed successfully for '{book.titles}' by {customer}.")
 
 if __name__ == "__main__":
     main()
