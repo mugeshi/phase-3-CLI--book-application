@@ -20,6 +20,8 @@ def main():
 @click.option('--genre', prompt='Enter genre', help='Genre of the book')
 @click.option('--price', prompt='Enter price', type=int, help='Price of the book')
 @click.option('--stock', prompt='Enter stock quantity', type=int, help='Stock quantity of the book')
+
+
 def add_book(title, author, genre, price, stock):
     """Add a new book to the bookstore."""
      # Sort the books by title for a more organized display
@@ -43,7 +45,7 @@ def list_books():
         for book in sorted_books:
             click.echo(f"Title: {book.titles}, Author: {book.author}, Genre: {book.genre}, Price: {book.price}, Stock: {book.stock}")
 
-# Define a CLI command to place an order for a book
+# Defining a CLI command to place an order for a book
 @main.command()
 @click.option('--customer', prompt='Enter customer name', help='Name of the customer')
 @click.option('--book_id', prompt='Enter book ID', type=int, help='ID of the book to order')
@@ -62,7 +64,6 @@ def place_order(customer, book_id, quantity):
     if not book:
         click.echo(f"Book with ID {book_id} does not exist.")
         return
-
     if book.stock < quantity:
         click.echo(f"Sorry, there is not enough stock available for '{book.titles}'")
         return
@@ -72,6 +73,27 @@ def place_order(customer, book_id, quantity):
     book.stock -= quantity  # Reduce stock
     session.commit()
     click.echo(f"Order placed successfully for '{book.titles}' by {customer}.")
+
+@main.command()
+@click.option('--book_id', prompt='Enter book ID to delete', type=int, help='ID of the book to delete')
+def delete_book(book_id):
+    """Delete a book from the bookstore."""
+    book = session.query(Book).filter_by(id=book_id).first()
+    
+    if not book:
+        click.echo(f"Book with ID {book_id} does not exist.")
+        return
+
+    # Confirm with the user before deleting
+    confirmation = click.confirm(f"Are you sure you want to delete '{book.titles}' (ID: {book.id})?")
+    
+    if confirmation:
+        session.delete(book)
+        session.commit()
+        click.echo(f"Book '{book.titles}' (ID: {book.id}) deleted successfully.")
+    else:
+        click.echo(f"Deletion of '{book.titles}' (ID: {book.id}) canceled.")
+   
 
 if __name__ == "__main__":
     main()
