@@ -16,7 +16,7 @@ class Book(Base):
     author = Column(String, nullable=False)
     genre = Column(String)
     price = Column(Integer)
-    stock = Column(Integer)
+    stocks = Column(Integer)
     orders = relationship("Order", back_populates="book") 
 
 class Customer(Base):
